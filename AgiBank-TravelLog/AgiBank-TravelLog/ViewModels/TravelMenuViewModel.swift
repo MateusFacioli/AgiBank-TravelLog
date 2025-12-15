@@ -15,7 +15,6 @@ class TravelMenuViewModel: ObservableObject {
     @Published var isLoading: Bool = false
     
     private let allDestinations: [TravelDestination] = [
-        // Exemplos para "Minhas Viagens"
         TravelDestination(
             id: UUID(),
             name: "Paris, França",

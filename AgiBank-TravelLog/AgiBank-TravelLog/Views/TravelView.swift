@@ -13,7 +13,6 @@ struct TravelView: View {
     var body: some View {
         NavigationStack {
             VStack {
-                // Menu principal - corrigido com Binding
                 HorizontalTravelMenu(
                     selectedCategory: $viewModel.selectedCategory
                 )
