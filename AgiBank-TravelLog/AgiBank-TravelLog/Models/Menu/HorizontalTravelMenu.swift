@@ -1,5 +1,5 @@
 //
-//  HorizontalTravelMenu 2.swift
+//  HorizontalTravelMenu.swift
 //  AgiBank-TravelLog
 //
 //  Created by Mateus Rodrigues on 12/12/25.
