@@ -1,0 +1,24 @@
+# Xcode
+.DS_Store
+*.xcuserstate
+*.xcbkptlist
+xcuserdata/
+DerivedData/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+._*
+.Spotlight-V100
+.Trashes
+
+# Build
+build/
+
+# Projeto específico
+AgiBank-TravelLog/.DS_Store
+../.DS_Store
+AgiBank-TravelLog.xcodeproj/project.xcworkspace/xcuserdata/
+AgiBank-TravelLog.xcodeproj/xcuserdata/
