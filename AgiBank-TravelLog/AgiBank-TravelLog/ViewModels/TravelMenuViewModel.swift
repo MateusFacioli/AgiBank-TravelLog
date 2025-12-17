@@ -14,9 +14,11 @@ final class TravelMenuViewModel: ObservableObject {
     @Published var isLoading = false
     
     private let allDestinations = MockData.travelDestinations
+    private var currentCategoryData: [TravelDestination] = []
     
     init() {
         filteredItems = allDestinations
+        currentCategoryData = allDestinations
     }
     
     func filterByCategory(_ category: MenuItem.MenuCategory) {
@@ -29,8 +31,11 @@ final class TravelMenuViewModel: ObservableObject {
         if category == .myTrips {
             filteredItems = allDestinations
         } else {
-            filteredItems = allDestinations.filter { $0.category.rawValue == category.rawValue }
+            filteredItems = allDestinations.filter { destination in
+                destination.category.rawValue == category.rawValue
+            }
         }
+        currentCategoryData = filteredItems
     }
     
     func loadDestinations() async {

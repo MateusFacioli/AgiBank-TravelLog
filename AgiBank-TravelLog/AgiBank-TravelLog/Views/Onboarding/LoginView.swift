@@ -60,9 +60,6 @@ struct LoginView: View {
                                     Image(systemName: "airplane")
                                         .font(.system(size: 30))
                                         .foregroundColor(.white)
-                                        .onTapGesture {
-                                            triggerAirplaneAnimation()
-                                        }
                                 } else {
                                     FlyingAirplaneView {
                                         DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
@@ -153,9 +150,7 @@ struct LoginView: View {
                                 .focused($focusedField, equals: .password)
                                 .submitLabel(.done)
                                 .onSubmit {
-                                    if !username.isEmpty && !password.isEmpty {
-                                        triggerAirplaneAnimation()
-                                    }
+                                    validateAndStartLogin()
                                 }
                             }
                             
@@ -172,7 +167,7 @@ struct LoginView: View {
                             
                             // Botão de login
                             Button(action: {
-                                triggerAirplaneAnimation()
+                                validateAndStartLogin()
                             }) {
                                 HStack {
                                     if isLoggingIn {
@@ -217,10 +212,7 @@ struct LoginView: View {
                                     y: 4
                                 )
                             }
-                            .disabled(
-                                isLoggingIn || username.isEmpty
-                                    || password.isEmpty || showAirplaneAnimation
-                            )
+                            .disabled(isLoggingIn || showAirplaneAnimation)
                             .padding(.top, 20)
                             .padding(.bottom, 10)
                             
@@ -291,22 +283,46 @@ struct LoginView: View {
         }
     }
     
-    private func triggerAirplaneAnimation() {
-        // Validação simples
-        guard !username.isEmpty else {
-            errorMessage = "Por favor, digite seu usuário"
+    private func validateAndStartLogin() {
+        // Validação dos campos
+        let validationError = validateFields()
+        
+        if let error = validationError {
+            errorMessage = error
             showError = true
             return
+        }
+        
+        // Se validação passar, inicia o processo de login
+        startLoginProcess()
+    }
+    
+    private func validateFields() -> String? {
+        // Validação simples
+        guard !username.isEmpty else {
+            return "Por favor, digite seu usuário"
         }
         
         guard !password.isEmpty else {
-            errorMessage = "Por favor, digite sua senha"
-            showError = true
-            return
+            return "Por favor, digite sua senha"
         }
         
+        if username.count < 3 {
+            return "O usuário deve ter pelo menos 3 caracteres"
+        }
+        
+        if password.count < 4 {
+            return "A senha deve ter pelo menos 4 caracteres"
+        }
+        
+        return nil // Nenhum erro
+    }
+    
+    private func startLoginProcess() {
         hideKeyboard()
         isLoggingIn = true
+        
+        // Desabilita os campos durante o login
         withAnimation(.easeInOut(duration: 0.3)) {
             showAirplaneAnimation = true
         }
@@ -315,18 +331,31 @@ struct LoginView: View {
     private func performLogin() {
         // Simula processo de login após a animação
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-            // Login simulado - em produção, validaria com API
-            if username.lowercased() == "matt" && password == "123" {
+            isLoggingIn = false
+            
+            // Validação de credenciais
+            if isValidCredentials() {
                 navigateToMain = true
             } else {
-                // Para testes, permite qualquer login
-                navigateToMain = true
+                // Credenciais inválidas
+                showError = true
+                errorMessage = "Usuário ou senha inválidos"
                 
-                // Para produção, descomente o código abaixo:
-                // errorMessage = "Usuário ou senha inválidos"
-                // showError = true
+                // Reseta a animação
+                withAnimation(.easeInOut(duration: 0.3)) {
+                    showAirplaneAnimation = false
+                }
             }
         }
+    }
+    
+    private func isValidCredentials() -> Bool {
+        // Para teste, aceita qualquer combinação
+        // Em produção, validaria com API
+        return true
+        
+        // Para validação específica:
+        // return username.lowercased() == "matt" && password == "123"
     }
     
     private func hideKeyboard() {
