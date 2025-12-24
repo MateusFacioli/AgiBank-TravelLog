@@ -54,8 +54,8 @@ struct DestinationHeaderView: View {
             VStack(alignment: .leading, spacing: 4) {
                 CategoryBadgeView(category: destination.category)
                     .padding(8)
-                    .background(.ultraThinMaterial)
                     .clipShape(RoundedRectangle(cornerRadius: 8))
+                    .background(.ultraThinMaterial)
                 
                 if let photos = enrichedData?.photos, photos.count > 1 {
                     HStack(spacing: 4) {

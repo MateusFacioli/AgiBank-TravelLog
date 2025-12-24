@@ -57,12 +57,6 @@ struct TransportView: View {
                             .symbolEffect(.bounce, value: viewModel.userLocation)
                     }
                 }
-                
-                ToolbarItem(placement: .topBarLeading) {
-                    Text("Raio: \(Int(viewModel.searchRadius))km")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
             }
             .sheet(isPresented: $showingFilters) {
                 TransportFiltersView(viewModel: viewModel)

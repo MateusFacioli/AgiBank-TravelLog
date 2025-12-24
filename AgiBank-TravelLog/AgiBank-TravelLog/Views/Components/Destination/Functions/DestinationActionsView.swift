@@ -65,7 +65,7 @@ struct DestinationActionsView: View {
             Button(action: {
                 openInMaps()
             }) {
-                Label("Navegar", systemImage: "map.fill")
+                Label("Navegar", systemImage: "map")
                     .labelStyle(.iconOnly)
             }
         }

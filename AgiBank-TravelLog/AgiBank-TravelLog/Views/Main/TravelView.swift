@@ -48,7 +48,7 @@ struct TravelView: View {
             }
         }
     }
-    //facy title ?
+    
     private var navigationTitle: String {
         viewModel.selectedCategory.rawValue
     }

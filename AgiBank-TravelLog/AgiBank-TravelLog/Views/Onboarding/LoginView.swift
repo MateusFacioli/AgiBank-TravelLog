@@ -280,6 +280,9 @@ struct LoginView: View {
             .onTapGesture {
                 hideKeyboard()
             }
+//            .onAppear {
+//                AppIconGenerator.generateAppIcon()
+//            }
         }
     }
     

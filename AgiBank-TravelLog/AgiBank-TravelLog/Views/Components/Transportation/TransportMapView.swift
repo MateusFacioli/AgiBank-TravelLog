@@ -34,7 +34,7 @@ struct TransportMapView: UIViewRepresentable {
         }
         
         // Remove anotações antigas
-        let oldAnnotations = mapView.annotations.filter { 
+        let oldAnnotations = mapView.annotations.filter {
             $0 is TransportAnnotation 
         }
         mapView.removeAnnotations(oldAnnotations)
@@ -155,71 +155,116 @@ class TransportAnnotation: NSObject, MKAnnotation {
     }
 }
 
-#Preview {
-    let mockViewModel = TransportViewModel(forPreview: true)
-    
-    // Adicione algumas opções de transporte mockadas
-    mockViewModel.transportOptions = [
-        TransportOptionModel(
-            name: "Uber X",
-            type: .rideSharing,
-            icon: "car.fill",
-            color: .black,
-            coordinate: CLLocationCoordinate2D(latitude: -23.5505, longitude: -46.6333),
-            duration: 8,
-            distance: 3.2,
-            price: "R$ 15-20",
-            details: []
-        ),
-        TransportOptionModel(
-            name: "Táxi",
-            type: .taxi,
-            icon: "taxi.fill",
-            color: .yellow,
-            coordinate: CLLocationCoordinate2D(latitude: -23.551, longitude: -46.634),
-            duration: 5,
-            distance: 1.8,
-            price: "R$ 12-18",
-            details: []
-        ),
-        TransportOptionModel(
-            name: "Bike Itaú",
-            type: .bike,
-            icon: "bicycle",
-            color: .orange,
-            coordinate: CLLocationCoordinate2D(latitude: -23.549, longitude: -46.632),
-            duration: 12,
-            distance: 1.5,
-            price: "R$ 5/hora",
-            details: []
-        )
-    ]
+// MARK: - Previews usando MockData
+
+#Preview("Mapa com Transportes") {
+    let mockViewModel = MockData.createTransportViewModel()
     
     return TransportMapView(viewModel: mockViewModel)
         .frame(height: 400)
-        .previewDisplayName("Transport Map")
+        .previewDisplayName("Mapa com Transportes")
         .previewLayout(.sizeThatFits)
 }
 
-#Preview("Map with User Location") {
-    let mockViewModel = TransportViewModel(forPreview: true)
-    
-    // Simule localização do usuário
-    mockViewModel.userLocation = CLLocation(
-        latitude: -23.5505,
-        longitude: -46.6333
-    )
+#Preview("Mapa com Localização do Usuário") {
+    let mockViewModel = MockData.createTransportViewModel()
     
     return TransportMapView(viewModel: mockViewModel)
         .frame(height: 400)
-        .previewDisplayName("Map with User Location")
+        .previewDisplayName("Mapa com Localização do Usuário")
+        .previewLayout(.sizeThatFits)
 }
 
-#Preview("Empty Map") {
-    let mockViewModel = TransportViewModel(forPreview: true)
+#Preview("Mapa Vazio") {
+    let mockViewModel = MockData.createTransportViewModel()
     mockViewModel.transportOptions = [] // Mapa vazio
     
     return TransportMapView(viewModel: mockViewModel)
         .frame(height: 400)
-        .previewDisplayName("Empty Map")
+        .previewDisplayName("Mapa Vazio")
+        .previewLayout(.sizeThatFits)
+}
+
+#Preview("Apenas Carros") {
+    let mockViewModel = MockData.createTransportViewModel()
+    // Filtra apenas carros para o preview
+    mockViewModel.transportOptions = mockViewModel.transportOptions.filter { option in
+        option.type == .rideSharing || option.type == .taxi
+    }
+    
+    return TransportMapView(viewModel: mockViewModel)
+        .frame(height: 400)
+        .previewDisplayName("Apenas Carros")
+        .previewLayout(.sizeThatFits)
+}
+
+#Preview("Transportes Sustentáveis") {
+    let mockViewModel = MockData.createTransportViewModel()
+    // Filtra transportes sustentáveis
+    mockViewModel.transportOptions = mockViewModel.transportOptions.filter { option in
+        option.type == .bike || option.type == .scooter || option.type == .subway || option.type == .bus
+    }
+    
+    return TransportMapView(viewModel: mockViewModel)
+        .frame(height: 400)
+        .previewDisplayName("Transportes Sustentáveis")
+        .previewLayout(.sizeThatFits)
+        .preferredColorScheme(.dark)
+}
+
+// Preview para diferentes dispositivos
+#Preview("iPhone 15 Pro") {
+    let mockViewModel = MockData.createTransportViewModel()
+    
+    return TransportMapView(viewModel: mockViewModel)
+        .frame(height: 600)
+        .previewDevice("iPhone 15 Pro")
+        .previewDisplayName("iPhone 15 Pro")
+}
+
+#Preview("iPad") {
+    let mockViewModel = MockData.createTransportViewModel()
+    
+    return TransportMapView(viewModel: mockViewModel)
+        .frame(height: 800)
+        .previewDevice("iPad Pro (11-inch)")
+        .previewDisplayName("iPad")
+}
+
+// Preview interativo para desenvolvimento
+struct TransportMapViewPreview: View {
+    @StateObject private var viewModel = MockData.createTransportViewModel()
+    
+    var body: some View {
+        VStack {
+            Text("Mapa de Transportes - Preview Interativo")
+                .font(.headline)
+                .padding()
+            
+            TransportMapView(viewModel: viewModel)
+                .frame(height: 500)
+                .cornerRadius(12)
+                .shadow(radius: 5)
+            
+            // Controles para o preview
+            VStack {
+                HStack {
+                    Text("Opções: \(viewModel.transportOptions.count)")
+                    Spacer()
+                    Button("Resetar") {
+                        viewModel.transportOptions = MockData.transportOptions
+                    }
+                }
+                .padding(.horizontal)
+                
+                Slider(value: .constant(5.0), in: 0.5...20.0)
+                    .padding(.horizontal)
+            }
+            .padding()
+        }
+    }
+}
+
+#Preview("Preview Interativo") {
+    TransportMapViewPreview()
 }

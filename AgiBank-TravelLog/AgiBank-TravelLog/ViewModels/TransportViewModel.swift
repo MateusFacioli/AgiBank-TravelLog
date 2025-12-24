@@ -119,7 +119,7 @@ class TransportViewModel: NSObject, ObservableObject {
     }
     
     func searchForLocation(_ query: String) {
-        // Implementar busca por endereço usando CLGeocoder ou Google Places API
+        // MARK: TODO Implementar busca por endereço usando CLGeocoder ou Google Places API
         let geocoder = CLGeocoder()
         geocoder.geocodeAddressString(query) { [weak self] placemarks, error in
             guard let self = self, let placemark = placemarks?.first else { return }
@@ -141,7 +141,6 @@ class TransportViewModel: NSObject, ObservableObject {
         radius: Double
     ) async throws -> [TransportOptionModel] {
         // Aqui você integra com APIs reais
-        // Vou mostrar múltiplas opções:
         
         var allOptions: [TransportOptionModel] = []
         
