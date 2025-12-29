@@ -17,12 +17,10 @@ struct DestinationListView: View {
                     DestinationCardView(
                         destination: destination,
                         onFavoriteTapped: {
-                            //MARK: TODO Ação de favoritar
-                            print("Favoritar: \(destination.name)")
+                            handleFavoriteTapped(for: destination)
                         },
                         onShareTapped: {
-                            //MARK: TODO Ação de compartilhar
-                            print("Compartilhar: \(destination.name)")
+                            handleShareTapped(for: destination)
                         }
                     )
                     .padding(.horizontal, 16)
@@ -30,5 +28,21 @@ struct DestinationListView: View {
             }
             .padding(.vertical, 16)
         }
+    }
+    
+    private func handleFavoriteTapped(for destination: TravelDestination) {
+        print("✅ Destino favoritado: \(destination.name)")
+        
+        // Feedback haptic
+        let generator = UINotificationFeedbackGenerator()
+        generator.notificationOccurred(.success)
+    }
+    
+    private func handleShareTapped(for destination: TravelDestination) {
+        print("📤 Compartilhando: \(destination.name)")
+        
+        // Feedback haptic
+        let generator = UIImpactFeedbackGenerator(style: .medium)
+        generator.impactOccurred()
     }
 }

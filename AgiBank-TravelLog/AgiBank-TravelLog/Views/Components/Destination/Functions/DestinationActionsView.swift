@@ -6,8 +6,9 @@
 //
 
 import SwiftUI
-import MapKit
+import UIKit
 import CoreLocation
+import MapKit
 
 struct DestinationActionsView: View {
     let onFavoriteTapped: (() -> Void)?
@@ -16,100 +17,142 @@ struct DestinationActionsView: View {
     let destination: TravelDestination
     let enrichedData: EnrichedDestinationModel?
     
+    @StateObject private var viewModel: DestinationCardViewModel
     @State private var showingShareSheet = false
     @State private var shareItems: [Any] = []
+    @State private var isLoadingWeather = false
+    
+    init(
+        onFavoriteTapped: (() -> Void)? = nil,
+        onShareTapped: (() -> Void)? = nil,
+        currentRating: Binding<Float>,
+        destination: TravelDestination,
+        enrichedData: EnrichedDestinationModel?
+    ) {
+        self.onFavoriteTapped = onFavoriteTapped
+        self.onShareTapped = onShareTapped
+        self._currentRating = currentRating
+        self.destination = destination
+        self.enrichedData = enrichedData
+        _viewModel = StateObject(wrappedValue: DestinationCardViewModel(destination: destination))
+    }
     
     var body: some View {
         HStack {
-            Button(action: { onFavoriteTapped?() }) {
-                Label("Favoritar", systemImage: "heart")
-                    .labelStyle(.iconOnly)
-                    .symbolEffect(.bounce, value: destination.rating)
+            Button(action: {
+                viewModel.toggleFavorite()
+                onFavoriteTapped?()
+            }) {
+                Image(systemName: viewModel.isFavorited ? "heart.fill" : "heart")
+                    .font(.system(size: 20))
+                    .foregroundColor(viewModel.isFavorited ? .red : .gray)
+                    .symbolEffect(.bounce, value: viewModel.isFavorited)
             }
+            
             Spacer()
             
             Menu {
+                // Opção 1: Compartilhar destino completo
                 Button(action: {
-                    prepareShareDestination()
+                    print("📤 Compartilhando destino completo...")
+                    shareItems = viewModel.shareDestination()
+                    showingShareSheet = true
                 }) {
                     Label("Compartilhar destino", systemImage: "square.and.arrow.up")
                 }
                 
-                if let enrichedData = enrichedData {
+                // Opção 2: Compartilhar APENAS com foco no clima
                     Button(action: {
-                        prepareShareWithWeather(enrichedData.weather)
+                        print("🌤️ Compartilhando apenas clima...")
+                        if let message = viewModel.shareWithWeather() {
+                            print("✅ Mensagem com clima pronta")
+                            shareItems = [message]
+                            showingShareSheet = true
+                        } else {
+                            print("⚠️ Sem dados de clima, usando compartilhamento padrão")
+                            shareItems = viewModel.shareDestination()
+                            showingShareSheet = true
+                        }
                     }) {
                         Label("Compartilhar com clima", systemImage: "cloud.sun.fill")
                     }
-                }
                 
                 Divider()
                 
-                ForEach(1...5, id: \.self) { star in
-                    Button(action: {
-                        withAnimation {
-                            currentRating = Float(star)
+                // Opção 3: Copiar informações
+                Button(action: {
+                    print("📋 Copiando informações...")
+                    copyToClipboard()
+                }) {
+                    Label("Copiar informações", systemImage: "doc.on.doc")
+                }
+                
+                // Opção 4: Avaliar
+                Section("Avaliar") {
+                    ForEach(1...5, id: \.self) { star in
+                        Button(action: {
+                            withAnimation {
+                                currentRating = Float(star)
+                            }
+                        }) {
+                            Label("\(star) estrela\(star > 1 ? "s" : "")",
+                                  systemImage: star <= Int(currentRating) ? "star.fill" : "star")
                         }
-                    }) {
-                        Label("\(star) estrela\(star > 1 ? "s" : "")",
-                              systemImage: star >= 3 ? "star.fill" : "star")
                     }
                 }
             } label: {
-                Label("Mais opções", systemImage: "ellipsis.circle")
-                    .labelStyle(.iconOnly)
+                Image(systemName: "ellipsis.circle")
+                    .font(.system(size: 20))
+                    .foregroundColor(.blue)
             }
             
             Spacer()
             
+            // Botão de Navegar (opcional)
             Button(action: {
                 openInMaps()
             }) {
-                Label("Navegar", systemImage: "map")
-                    .labelStyle(.iconOnly)
+                Image(systemName: "map")
+                    .font(.system(size: 20))
+                    .foregroundColor(.green)
             }
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 12)
         .background(Color.gray.opacity(0.05))
+        .onAppear {
+                    if enrichedData == nil && !isLoadingWeather {
+                        loadWeatherData()
+                    }
+                }
         .sheet(isPresented: $showingShareSheet) {
             ShareSheet(items: shareItems)
+                .presentationDetents([.medium, .large])
         }
     }
     
-    private func prepareShareDestination() {
-        var items: [Any] = ["🎯 \(destination.name)"]
-        
-        if let enrichedData = enrichedData {
-            if let weather = enrichedData.weather {
-                items.append("\n🌤️ Clima: \(weather.temperature)°C - \(weather.condition)")
-            }
-            if let travelTime = enrichedData.travelTime {
-                items.append("\n🚗 Tempo de viagem: \(travelTime.duration)")
-            }
+    private func loadWeatherData() {
+        isLoadingWeather = true
+        Task {
+            await viewModel.loadEnrichedData()
+            isLoadingWeather = false
         }
-        
-        items.append("\n⭐ Avaliação: \(String(format: "%.1f", currentRating))/5.0")
-        items.append("\n✍️ Minha nota: \(destination.notes)")
-        
-        shareItems = items
-        showingShareSheet = true
     }
     
-    private func prepareShareWithWeather(_ weather: WeatherDataModel?) {
-        guard let weather = weather else { return }
-        
-        let message = """
-        🌍 Destino: \(destination.name)
-        📍 Local: \(destination.location)
-        🌤️ Clima: \(weather.temperature)°C - \(weather.condition)
-        💧 Umidade: \(weather.humidity)%
-        💨 Vento: \(weather.windSpeed) km/h
-        ⭐ Minha avaliação: \(String(format: "%.1f", currentRating))/5.0
+    private func copyToClipboard() {
+        let pasteboard = UIPasteboard.general
+        let text = """
+        \(destination.name)
+        \(destination.location)
+        Avaliação: \(String(format: "%.1f", currentRating))/5.0
+        Notas: \(destination.notes)
         """
         
-        shareItems = [message]
-        showingShareSheet = true
+        pasteboard.string = text
+        
+        // Feedback
+        let generator = UINotificationFeedbackGenerator()
+        generator.notificationOccurred(.success)
     }
     
     private func openInMaps() {

@@ -9,6 +9,7 @@ import SwiftUI
 
 struct DestinationCardView: View {
     @StateObject private var viewModel: DestinationCardViewModel
+    @EnvironmentObject private var favoritesVM: FavoritesViewModel
     private let destination: TravelDestination
     private let onFavoriteTapped: (() -> Void)?
     private let onShareTapped: (() -> Void)?
@@ -81,6 +82,17 @@ struct DestinationCardView: View {
             await viewModel.loadEnrichedData()
         }
     }
+    
+    private func favoriteButton() -> some View {
+            Button(action: {
+                viewModel.toggleFavorite()
+                favoritesVM.toggleFavorite(for: destination)
+                onFavoriteTapped?()
+            }) {
+                Image(systemName: viewModel.isFavorited ? "heart.fill" : "heart")
+                    .foregroundColor(viewModel.isFavorited ? .red : .gray)
+            }
+        }
     
     private var headerView: some View {
         VStack(alignment: .leading, spacing: 8) {
