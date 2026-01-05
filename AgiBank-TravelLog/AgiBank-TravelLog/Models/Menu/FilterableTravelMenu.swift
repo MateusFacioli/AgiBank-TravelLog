@@ -44,9 +44,13 @@ struct FilterChip: View {
     
     var body: some View {
         HStack(spacing: 6) {
-            Image(systemName: systemImage)
-                .font(.caption)
-                .symbolEffect(.bounce, value: isSelected)
+            if #available(iOS 17.0, *) {
+                Image(systemName: systemImage)
+                    .font(.caption)
+                    .symbolEffect(.bounce, value: isSelected)
+            } else {
+                // Fallback on earlier versions
+            }
             Text(title)
                 .font(.caption)
                 .fontWeight(.medium)

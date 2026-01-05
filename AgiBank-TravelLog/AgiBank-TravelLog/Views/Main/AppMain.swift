@@ -1,18 +1,20 @@
 //
-//  AgiBank_TravelLogApp.swift
+//  AppMain.swift
 //  AgiBank-TravelLog
 //
-//  Created by Mateus Rodrigues on 10/12/25.
+//  Created by Mateus Rodrigues on 31/12/25.
 //
 
+import Foundation
 import SwiftUI
 import FirebaseCore
 
-@main
-struct AgiBank_TravelLogApp: App {
+@MainActor
+struct AgiBankTravelLogApp: App {
     @StateObject private var authVM = AuthViewModel()
 
     init() {
+        // Configure Firebase once at app startup
         if FirebaseApp.app() == nil {
             FirebaseApp.configure()
         }
