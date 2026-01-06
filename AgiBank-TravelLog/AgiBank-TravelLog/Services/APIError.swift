@@ -5,9 +5,10 @@
 //  Created by Mateus Rodrigues on 11/12/25.
 //
 
-
 import Foundation
 
+/// Enum que representa os erros possíveis na camada de API.
+/// Fornece descrições legíveis, sugestões de recuperação e códigos quando apropriado.
 enum APIError: Error, LocalizedError, Equatable {
     // Network errors
     case noInternetConnection
@@ -75,6 +76,7 @@ enum APIError: Error, LocalizedError, Equatable {
     case custom(message: String, code: Int? = nil)
     
     // MARK: - Properties
+    /// Mensagem legível representando o erro.
     var errorDescription: String? {
         switch self {
         case .noInternetConnection:
@@ -180,6 +182,7 @@ enum APIError: Error, LocalizedError, Equatable {
         }
     }
     
+    /// Sugestões de recuperação para apresentar ao usuário.
     var recoverySuggestion: String? {
         switch self {
         case .noInternetConnection, .notConnectedToInternet:
@@ -199,6 +202,7 @@ enum APIError: Error, LocalizedError, Equatable {
         }
     }
     
+    /// Código numérico associado ao erro (quando aplicável).
     var errorCode: Int? {
         switch self {
         case .noInternetConnection: return -1009
@@ -233,9 +237,10 @@ enum APIError: Error, LocalizedError, Equatable {
     }
     
     // MARK: - Helper Methods
+    /// Indica se é um erro de rede (útil para exibir mensagens apropriadas).
     var isNetworkError: Bool {
         switch self {
-        case .noInternetConnection, .timeout, .networkConnectionLost, 
+        case .noInternetConnection, .timeout, .networkConnectionLost,
              .notConnectedToInternet, .dnsLookupFailed:
             return true
         default:
@@ -243,6 +248,7 @@ enum APIError: Error, LocalizedError, Equatable {
         }
     }
     
+    /// Indica se é um erro de autenticação.
     var isAuthenticationError: Bool {
         switch self {
         case .unauthorized, .forbidden, .authenticationFailed,
@@ -253,6 +259,7 @@ enum APIError: Error, LocalizedError, Equatable {
         }
     }
     
+    /// Indica se é um erro do lado do cliente (4xx).
     var isClientError: Bool {
         if case .invalidStatusCode(let code) = self {
             return (400...499).contains(code)
@@ -267,6 +274,7 @@ enum APIError: Error, LocalizedError, Equatable {
         }
     }
     
+    /// Indica se é um erro do servidor (5xx).
     var isServerError: Bool {
         if case .invalidStatusCode(let code) = self {
             return (500...599).contains(code)
@@ -280,6 +288,10 @@ enum APIError: Error, LocalizedError, Equatable {
         }
     }
     
+    /// Mapeia um status code HTTP para um `APIError`.
+    /// - Parameters:
+    ///   - statusCode: código retornado pela API
+    ///   - message: mensagem opcional vinda do servidor
     static func from(statusCode: Int, message: String? = nil) -> APIError {
         switch statusCode {
         case 400: return .badRequest
@@ -300,6 +312,7 @@ enum APIError: Error, LocalizedError, Equatable {
         }
     }
     
+    /// Converte `Error` de rede para `APIError`.
     static func from(error: Error) -> APIError {
         let nsError = error as NSError
         
@@ -329,6 +342,7 @@ enum APIError: Error, LocalizedError, Equatable {
 
 // MARK: - Convenience Extensions
 extension APIError {
+    /// Dicionário pronto para envio a analytics/telemetria.
     var analyticsDictionary: [String: Any] {
         var dict: [String: Any] = [
             "error_type": String(describing: self),

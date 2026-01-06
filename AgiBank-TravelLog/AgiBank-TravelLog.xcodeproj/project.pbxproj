@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		DC70C2D62EE95B82008E663F /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = DC70C2D52EE95B82008E663F /* README.md */; };
+		DC79C69F2F0C031900C3B191 /* AgiBank-TravelLog.docc in Sources */ = {isa = PBXBuildFile; fileRef = DC79C69E2F0C031900C3B191 /* AgiBank-TravelLog.docc */; };
 		DCDB628D2F07EBB7006F34BB /* FirebaseAI in Frameworks */ = {isa = PBXBuildFile; productRef = DCDB628C2F07EBB7006F34BB /* FirebaseAI */; };
 		DCDB628F2F07EBB7006F34BB /* FirebaseAILogic in Frameworks */ = {isa = PBXBuildFile; productRef = DCDB628E2F07EBB7006F34BB /* FirebaseAILogic */; };
 		DCDB62912F07EBB7006F34BB /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = DCDB62902F07EBB7006F34BB /* FirebaseAnalytics */; };
@@ -42,6 +43,7 @@
 		DC70C2B62EE95998008E663F /* AgiBank-TravelLogTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "AgiBank-TravelLogTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		DC70C2C02EE95998008E663F /* AgiBank-TravelLogUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "AgiBank-TravelLogUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		DC70C2D52EE95B82008E663F /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
+		DC79C69E2F0C031900C3B191 /* AgiBank-TravelLog.docc */ = {isa = PBXFileReference; lastKnownFileType = folder.documentationcatalog; path = "AgiBank-TravelLog.docc"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -120,6 +122,7 @@
 		DC70C2A02EE95995008E663F = {
 			isa = PBXGroup;
 			children = (
+				DC79C69E2F0C031900C3B191 /* AgiBank-TravelLog.docc */,
 				DC70C2D52EE95B82008E663F /* README.md */,
 				DC70C2AB2EE95995008E663F /* AgiBank-TravelLog */,
 				DC70C2B92EE95998008E663F /* AgiBank-TravelLogTests */,
@@ -297,6 +300,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DC79C69F2F0C031900C3B191 /* AgiBank-TravelLog.docc in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

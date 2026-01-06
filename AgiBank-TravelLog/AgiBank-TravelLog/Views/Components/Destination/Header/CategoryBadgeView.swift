@@ -5,12 +5,21 @@
 //  Created by Mateus Rodrigues on 16/12/25.
 //
 
+/**
+ Exibe um selo (badge) para a categoria de um destino de viagem.
+ 
+ - Mostra ícone e nome da categoria com estilo consistente (cápsula, cor temática e tipografia compacta).
+ - Útil para destacar o tipo de viagem em listas, cards e detalhes do destino.
+ */
+
 import SwiftUI
 
-// MARK: - Componentes Auxiliares
+/// Componente visual simples para representar a categoria de um destino com ícone e rótulo.
 struct CategoryBadgeView: View {
+    /// Categoria do destino usada para definir ícone, cor e rótulo exibidos.
     let category: TravelDestination.TravelCategory
     
+    /// Layout do badge com ícone SF Symbol e texto, estilizados em uma cápsula colorida.
     var body: some View {
         HStack(spacing: 4) {
             Image(systemName: categoryIcon)
@@ -27,6 +36,7 @@ struct CategoryBadgeView: View {
         .clipShape(Capsule())
     }
     
+    /// Cor associada a cada categoria, usada no fundo e no `foregroundStyle` do badge.
     private var categoryColor: Color {
         switch category {
         case .adventure: return .green
@@ -37,6 +47,7 @@ struct CategoryBadgeView: View {
         }
     }
     
+    /// Nome do SF Symbol correspondente à categoria informada.
     private var categoryIcon: String {
         switch category {
         case .adventure: return "mountain.2.fill"
@@ -48,6 +59,7 @@ struct CategoryBadgeView: View {
     }
 }
 
+/// Preview do componente com a categoria `.relax`.
 #Preview {
     CategoryBadgeView(category: .relax)
 }

@@ -1,3 +1,11 @@
+/**
+ View responsável por ações rápidas de um destino (favoritar, compartilhar, avaliar e abrir no Mapas).
+ 
+ - Apresenta um menu de ações com opções de compartilhamento (com e sem clima), cópia para a área de transferência e avaliação por estrelas.
+ - Integra-se com `DestinationCardViewModel` para obter e atualizar dados enriquecidos (ex.: clima) e estado de favorito.
+ - Pode disparar callbacks externos (`onFavoriteTapped`, `onShareTapped`) para que a tela pai reaja a interações.
+*/
+
 //
 //  DestinationActionsView.swift
 //  AgiBank-TravelLog
@@ -10,18 +18,36 @@ import UIKit
 import CoreLocation
 import MapKit
 
+/// Componente SwiftUI que exibe botões e menu de ações para um destino específico.
+/// Controla favoritos, compartilhamento e navegação, além de permitir avaliar o destino.
 struct DestinationActionsView: View {
+    /// Callback opcional disparado após o usuário tocar no botão de favorito.
     let onFavoriteTapped: (() -> Void)?
+    /// Callback opcional disparado após o usuário iniciar um fluxo de compartilhamento.
     let onShareTapped: (() -> Void)?
+    /// Binding para a avaliação atual do destino (1 a 5 estrelas).
     @Binding var currentRating: Float
+    /// Modelo do destino exibido.
     let destination: TravelDestination
+    /// Dados enriquecidos do destino (ex.: clima, tempo de viagem), quando já disponíveis.
     let enrichedData: EnrichedDestinationModel?
     
+    /// ViewModel responsável por lógica de favoritos, compartilhamento e carregamento de dados enriquecidos.
     @StateObject private var viewModel: DestinationCardViewModel
+    /// Controla a apresentação do ShareSheet nativo.
     @State private var showingShareSheet = false
+    /// Itens que serão compartilhados pelo ShareSheet.
     @State private var shareItems: [Any] = []
+    /// Indica se o carregamento de dados de clima está em andamento.
     @State private var isLoadingWeather = false
     
+    /// Inicializador do componente de ações do destino.
+    /// - Parameters:
+    ///   - onFavoriteTapped: Callback opcional após tocar em favorito.
+    ///   - onShareTapped: Callback opcional após iniciar compartilhamento.
+    ///   - currentRating: Binding para a avaliação exibida/ajustada na UI.
+    ///   - destination: Modelo do destino alvo das ações.
+    ///   - enrichedData: Dados enriquecidos (se já carregados) para alimentar opções de compartilhamento.
     init(
         onFavoriteTapped: (() -> Void)? = nil,
         onShareTapped: (() -> Void)? = nil,
@@ -37,6 +63,7 @@ struct DestinationActionsView: View {
         _viewModel = StateObject(wrappedValue: DestinationCardViewModel(destination: destination))
     }
     
+    /// Layout principal com botões de favorito, menu de ações e atalho para Mapas.
     var body: some View {
         HStack {
             Button(action: {
@@ -131,6 +158,7 @@ struct DestinationActionsView: View {
         }
     }
     
+    /// Dispara o carregamento assíncrono de dados enriquecidos (clima) via ViewModel.
     private func loadWeatherData() {
         isLoadingWeather = true
         Task {
@@ -139,6 +167,7 @@ struct DestinationActionsView: View {
         }
     }
     
+    /// Copia informações resumidas do destino para a área de transferência e emite feedback háptico.
     private func copyToClipboard() {
         let pasteboard = UIPasteboard.general
         let text = """
@@ -155,6 +184,7 @@ struct DestinationActionsView: View {
         generator.notificationOccurred(.success)
     }
     
+    /// Abre o endereço do destino no app Mapas utilizando geocodificação do `CoreLocation`.
     private func openInMaps() {
         let geocoder = CLGeocoder()
         geocoder.geocodeAddressString(destination.location) { placemarks, error in
@@ -173,12 +203,15 @@ struct DestinationActionsView: View {
     }
 }
 
+/// Wrapper SwiftUI para apresentar `UIActivityViewController` (ShareSheet) com itens fornecidos.
 struct ShareSheet: UIViewControllerRepresentable {
     let items: [Any]
     
+    /// Cria e retorna o `UIActivityViewController` configurado com os itens.
     func makeUIViewController(context: Context) -> UIActivityViewController {
         UIActivityViewController(activityItems: items, applicationActivities: nil)
     }
     
+    /// Atualizações não necessárias para este caso de uso (sem estado dinâmico após criação).
     func updateUIViewController(_ uiViewController: UIActivityViewController, context: Context) {}
 }

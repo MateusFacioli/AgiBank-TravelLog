@@ -11,26 +11,54 @@ import CoreLocation
 import MapKit
 import Combine
 
+/**
+ ViewModel responsável por centralizar dados, lógica e interações do módulo de transporte no app.
+ Gera opções de transporte próximas do usuário, integra com APIs externas e gerencia permissões de localização.
+
+ - Author: Equipe AgiBank-TravelLog
+
+ Modificadores especiais usados:
+ - @MainActor: Garante que toda a lógica, atualizações e notificações de UI ocorram na thread principal.
+ - @Published: Permite que propriedades publiquem notificações reativas para SwiftUI (explicado na primeira ocorrência).
+ - private: Garante o encapsulamento de propriedades e métodos internos à ViewModel (explicado na primeira ocorrência).
+ */
 @MainActor
 class TransportViewModel: NSObject, ObservableObject {
     // MARK: - Published Properties
+    /// Localização atual do usuário (ou nil se ainda não determinada).
+    /// Usando @Published para notificar automaticamente a UI a cada alteração.
     @Published var userLocation: CLLocation?
+    
+    /// Raio de busca para opções de transporte (em km).
     @Published var searchRadius: Double = 5.0 // km
+    
+    /// Lista de opções de transporte disponíveis conforme a busca e filtros.
     @Published var transportOptions: [TransportOptionModel] = []
+    
+    /// Indica se está ocorrendo uma busca carregando dados.
     @Published var isLoading = false
+    
+    /// Controla exibição de alerta caso permissão de localização não seja concedida.
     @Published var showLocationAlert = false
+    
+    /// Tipos de transporte selecionados para filtragem das opções.
     @Published var selectedTransportTypes: Set<TransportType>
+    
+    /// Região do mapa exibida com centro e zoom.
     @Published var region = MKCoordinateRegion(
         center: CLLocationCoordinate2D(latitude: -23.5505, longitude: -46.6333), // São Paulo
         span: MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05)
     )
     
     // MARK: - Private Properties
+    /// Gerenciador de localização utilizado para obter a posição do usuário. Uso privado para garantir o encapsulamento.
     private let locationManager = CLLocationManager()
-//    private var apiService = TransportAPIService()
+    
+    /// Conjunto para armazenar assinaturas Combine e controlar ciclo de vida.
     private var cancellables = Set<AnyCancellable>()
     
     // MARK: - Initialization
+    /// Inicializa o TransportViewModel, configurando transportes, permissões e assinaturas.
     override init() {
         self.selectedTransportTypes = Set(TransportType.allCases)
         super.init()
@@ -39,12 +67,14 @@ class TransportViewModel: NSObject, ObservableObject {
     }
     
     // MARK: - Setup Methods
+    /// Configura o CLLocationManager e solicita autorização de localização.
     private func setupLocationManager() {
         locationManager.delegate = self
         locationManager.desiredAccuracy = kCLLocationAccuracyBest
         locationManager.requestWhenInUseAuthorization()
     }
     
+    /// Configura as assinaturas para reagir a mudanças da localização do usuário.
     private func setupSubscriptions() {
         $userLocation
             .compactMap { $0 }
@@ -57,6 +87,8 @@ class TransportViewModel: NSObject, ObservableObject {
     }
     
     // MARK: - Public Methods
+    
+    /// Solicita permissão para acessar localização do usuário, e inicia atualização se autorizada.
     func requestLocationPermission() {
         switch locationManager.authorizationStatus {
         case .notDetermined:
@@ -70,6 +102,7 @@ class TransportViewModel: NSObject, ObservableObject {
         }
     }
     
+    /// Centraliza a região do mapa na localização atual do usuário com animação.
     func centerOnUserLocation() {
         guard let location = userLocation else {
             requestLocationPermission()
@@ -82,6 +115,8 @@ class TransportViewModel: NSObject, ObservableObject {
         }
     }
     
+    /// Realiza busca assíncrona de opções de transporte próximas à localização do usuário.
+    /// Atualiza a lista filtrando pelos tipos selecionados.
     func searchTransportOptions() {
         guard let userLocation = userLocation else {
             requestLocationPermission()
@@ -118,6 +153,8 @@ class TransportViewModel: NSObject, ObservableObject {
         }
     }
     
+    /// Busca localização geográfica a partir de uma string de endereço.
+    /// - Parameter query: String contendo o endereço a ser pesquisado.
     func searchForLocation(_ query: String) {
         // MARK: TODO Implementar busca por endereço usando CLGeocoder ou Google Places API
         let geocoder = CLGeocoder()
@@ -136,6 +173,12 @@ class TransportViewModel: NSObject, ObservableObject {
     }
     
     // MARK: - API Integration
+    
+    /// Busca opções de transporte integrando dados mockados e APIs externas.
+    /// - Parameters:
+    ///   - coordinate: Localização base para busca.
+    ///   - radius: Raio de busca em metros.
+    /// - Returns: Lista combinada e ordenada de opções de transporte.
     private func fetchTransportOptions(
         from coordinate: CLLocationCoordinate2D,
         radius: Double
@@ -166,6 +209,11 @@ class TransportViewModel: NSObject, ObservableObject {
         return allOptions.sorted { $0.duration < $1.duration }
     }
     
+    /// Busca opções de transporte público usando a API do Google Directions.
+    /// - Parameters:
+    ///   - coordinate: Localização inicial.
+    ///   - radius: Raio de busca em metros.
+    /// - Returns: Lista de opções de transporte obtidas via Google.
     private func fetchGoogleTransportOptions(
         from coordinate: CLLocationCoordinate2D,
         radius: Double
@@ -207,6 +255,9 @@ class TransportViewModel: NSObject, ObservableObject {
         }
     }
     
+    /// Busca opções de transporte público via API de transporte local (exemplo: SPTrans).
+    /// - Parameter coordinate: Localização base.
+    /// - Returns: Lista de opções de transporte público simuladas.
     private func fetchPublicTransportOptions(
         from coordinate: CLLocationCoordinate2D
     ) async throws -> [TransportOptionModel] {
@@ -248,6 +299,8 @@ class TransportViewModel: NSObject, ObservableObject {
         ]
     }
     
+    /// Atualiza os tipos de transporte selecionados e refaz a busca.
+    /// - Parameter newSet: Novo conjunto de tipos selecionados.
     func updateSelectedTransportTypes(_ newSet: Set<TransportType>) {
         selectedTransportTypes = newSet
         searchTransportOptions()
@@ -255,6 +308,10 @@ class TransportViewModel: NSObject, ObservableObject {
 }
 
 // MARK: - CLLocationManagerDelegate
+/**
+ Gerencia callbacks do CLLocationManager para monitorar mudanças na autorização e localização do usuário.
+ Responsável por iniciar atualizações, tratar erros e exibir alertas conforme o status da permissão.
+ */
 extension TransportViewModel: CLLocationManagerDelegate {
     func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
         switch manager.authorizationStatus {
@@ -285,6 +342,10 @@ extension TransportViewModel: CLLocationManagerDelegate {
 }
 
 // MARK: - Métodos para gerenciar tipos de transporte
+/**
+ Fornece métodos utilitários para atualizar a seleção dos tipos de transporte
+ e para resetar para o conjunto completo.
+ */
 extension TransportViewModel {
     func updateTransportType(_ type: TransportType, isSelected: Bool) {
         var updatedSet = selectedTransportTypes
@@ -302,3 +363,4 @@ extension TransportViewModel {
         updateSelectedTransportTypes(Set(TransportType.allCases))
     }
 }
+

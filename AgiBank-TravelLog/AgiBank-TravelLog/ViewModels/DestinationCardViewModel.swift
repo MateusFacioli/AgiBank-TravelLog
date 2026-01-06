@@ -5,27 +5,44 @@
 //  Created by Mateus Rodrigues on 16/12/25.
 //
 
-
 import SwiftUI
 import Combine
 import UIKit
 
+/**
+ Marca a classe para que todas as operações sejam executadas na Main Thread (thread principal).
+ Isso garante que todas as atualizações de estado e UI estejam protegidas contra race conditions,
+ essencial em ViewModels que lidam com SwiftUI.
+ */
 @MainActor
 final class DestinationCardViewModel: ObservableObject {
+    /// Avaliação atual exibida no cartão do destino.
+    /// Usando @Published pois permite que SwiftUI atualize a interface automaticamente quando o valor muda.
     @Published var currentRating: Float
+    /// Dados enriquecidos sobre o destino (clima, tempo de viagem, etc).
     @Published var enrichedData: EnrichedDestinationModel?
+    /// Indica se o enriquecimento dos dados está em andamento.
     @Published var isLoadingEnrichment = false
+    /// Índice da foto selecionada para exibição.
     @Published var selectedPhotoIndex = 0
+    /// Condições climáticas adicionais calculadas para exibir no cartão.
     @Published var additionalWeatherConditions: [AdditionalWeatherCondition] = []
+    /// Recomendações baseadas no clima atual.
     @Published var weatherRecommendations: [WeatherRecommendation] = []
+    /// Indica se o destino está marcado como favorito.
     @Published var isFavorited: Bool = false
     
+    /// A propriedade é private para garantir o encapsulamento e que só a própria ViewModel possa alterar esse valor.
+    /// Destino de viagem que esta ViewModel representa.
     private let destination: TravelDestination
+    /// Serviço para realizar chamadas à API de transporte.
     private let apiService: TransportAPIServiceProtocol
+    /// Serviço para obter dados e lógica relacionados ao clima.
     private let weatherService: WeatherServiceProtocol
+    /// Conjunto para armazenar assinaturas Combine.
     private var cancellables = Set<AnyCancellable>()
     
-    // Serviço de persistência
+    /// Serviço usado para persistir e consultar favoritos.
     private let favoritesService = FavoritesService.shared
     
     init(
@@ -44,6 +61,9 @@ final class DestinationCardViewModel: ObservableObject {
     }
     
     // MARK: - Public Methods
+    /// Carrega e atualiza dados enriquecidos para o destino, incluindo clima e tempo de viagem.
+    /// Atualiza propriedades relacionadas ao clima e recomendações.
+    /// Deve ser chamado de forma assíncrona.
     func loadEnrichedData() async {
         isLoadingEnrichment = true
         
@@ -59,6 +79,8 @@ final class DestinationCardViewModel: ObservableObject {
     }
     
     // MARK: - Favorite Functions
+    /// Alterna o status de favorito do destino, salvando ou removendo dos favoritos persistidos.
+    /// Dispara feedback háptico ao adicionar aos favoritos.
     func toggleFavorite() {
         isFavorited.toggle()
         
@@ -85,12 +107,14 @@ final class DestinationCardViewModel: ObservableObject {
     }
     
     // MARK: - Share Functions
+    /// Prepara uma lista de itens para compartilhamento do destino, incluindo notas e clima se disponível.
     func shareDestination() -> [Any] {
         print("🔍 shareDestination() chamado - enrichedData existe? \(enrichedData != nil)")
         print("🔍 Clima existe? \(enrichedData?.weather != nil)")
         return prepareShareItems()
     }
 
+    /// Prepara uma mensagem de texto para compartilhar o destino junto com as informações de clima.
     func shareWithWeather() -> String? {
         print("🌤️ shareWithWeather() chamado")
         print("🌤️ enrichedData existe? \(enrichedData != nil)")
@@ -119,6 +143,7 @@ final class DestinationCardViewModel: ObservableObject {
     }
     
     // MARK: - Private Methods
+    /// O uso de private nessa função garante que apenas a própria ViewModel pode gerenciar esta lógica de atualização.
     private func setupWeatherObservers() {
         $enrichedData
             .compactMap { $0?.weather?.condition }
@@ -213,10 +238,18 @@ final class DestinationCardViewModel: ObservableObject {
     }
     
     // MARK: - Weather UI Helpers
+    /// Retorna a cor UI adequada para a condição climática informada.
+    /// - Parameter condition: String representando a condição do clima.
+    /// - Returns: Cor apropriada para exibição.
     func weatherColor(for condition: String) -> Color {
         weatherService.weatherColor(for: condition)
     }
     
+    /// Retorna o nome do ícone SF Symbol correspondente à condição climática.
+    /// - Parameters:
+    ///   - condition: Condição do clima
+    ///   - isDay: Booleano indicando se é dia
+    /// - Returns: Nome do símbolo para exibição
     func weatherIcon(for condition: String, isDay: Bool = true) -> String {
         if let service = weatherService as? WeatherService {
             return service.weatherIcon(for: condition, isDay: isDay)
@@ -224,3 +257,4 @@ final class DestinationCardViewModel: ObservableObject {
         return "questionmark.circle.fill"
     }
 }
+

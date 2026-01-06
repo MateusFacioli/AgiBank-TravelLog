@@ -7,6 +7,8 @@
 
 import SwiftUI
 
+/// Serviço utilitário para obter cores, ícones, descrições e recomendações
+/// baseadas em condições climáticas textuais.
 protocol WeatherServiceProtocol {
     func weatherColor(for condition: String) -> Color
     func additionalWeatherConditions(for condition: String) -> [AdditionalWeatherCondition]
@@ -15,6 +17,9 @@ protocol WeatherServiceProtocol {
 class WeatherService: WeatherServiceProtocol {
     
     // MARK: - Weather Colors
+    
+    /// Retorna uma cor apropriada para uma condição de clima.
+    /// - Parameter condition: condição textual (ex: "Ensolarado", "Nublado").
     func weatherColor(for condition: String) -> Color {
         let lowerCondition = condition.lowercased()
         
@@ -36,6 +41,9 @@ class WeatherService: WeatherServiceProtocol {
     }
     
     // MARK: - Additional Weather Conditions
+    
+    /// Fornece condições auxiliares com ícones e cores relacionadas à condição principal.
+    /// - Parameter condition: condição principal (texto).
     func additionalWeatherConditions(for condition: String) -> [AdditionalWeatherCondition] {
         let lowerCondition = condition.lowercased()
         
@@ -68,7 +76,7 @@ class WeatherService: WeatherServiceProtocol {
         }
     }
     
-    // MARK: - Weather Icons Mapping
+    /// Mapeia condição para um SF Symbol.
     func weatherIcon(for condition: String, isDay: Bool = true) -> String {
         let lowerCondition = condition.lowercased()
         
@@ -91,7 +99,7 @@ class WeatherService: WeatherServiceProtocol {
         }
     }
     
-    // MARK: - Weather Descriptions
+    /// Retorna uma descrição localizada para exibir ao usuário.
     func localizedWeatherDescription(for condition: String) -> String {
         let lowerCondition = condition.lowercased()
         
@@ -116,7 +124,7 @@ class WeatherService: WeatherServiceProtocol {
         }
     }
     
-    // MARK: - Weather Recommendations
+    /// Gera recomendações detalhadas com base no modelo de clima.
     func weatherRecommendations(for weather: WeatherDataModel) -> [WeatherRecommendation] {
         var recommendations: [WeatherRecommendation] = []
         

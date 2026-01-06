@@ -4,6 +4,12 @@
 //
 //  Created by Mateus Rodrigues on 15/12/25.
 //
+/**
+ Componente de avaliação por estrelas para exibir e/ou ajustar a nota de um item.
+ 
+ - Suporta estados interativos e somente leitura conforme necessidade de uso.
+ - Ideal para avaliações de destinos, transportes e outros elementos do app.
+ */
 
 import SwiftUI
 

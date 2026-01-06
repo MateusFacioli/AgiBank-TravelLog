@@ -5,12 +5,23 @@
 //  Created by Mateus Rodrigues on 12/12/25.
 //
 
+/**
+ Item visual de menu que exibe ícone e título de uma opção, com destaque para o estado selecionado.
+ 
+ - Usa `symbolEffect` para dar feedback sutil quando selecionado.
+ - Ajusta cor e fundo (círculo) conforme `isSelected`.
+ */
+
 import SwiftUI
 
+/// Componente de item de menu horizontal/compacto usado em listas de categorias e filtros.
 struct MenuItemView: View {
+    /// Dados do item (ícone e título) a serem exibidos.
     let item: MenuItem
+    /// Indica se o item está selecionado, influenciando estilo e animação do ícone.
     let isSelected: Bool
     
+    /// Layout vertical com ícone e rótulo, aplicando destaque visual quando selecionado.
     var body: some View {
         VStack(spacing: 8) {
             Image(systemName: item.icon)
@@ -35,6 +46,7 @@ struct MenuItemView: View {
     }
 }
 
+/// Conjunto de Previews demonstrando o uso do `MenuItemView` em diferentes menus.
 #Preview {
     VStack(spacing: 30) {
         // Menu padrão
@@ -74,3 +86,4 @@ struct MenuItemView: View {
     }
     .padding(.vertical)
 }
+

@@ -5,15 +5,28 @@
 //  Created by Mateus Rodrigues on 16/12/25.
 //
 
+/**
+ Módulo de Transporte: exibe mapa, busca e lista de opções de transporte próximas.
+ 
+ - Integra mapa (MapKit) com controles de busca, filtros e resultados em lista horizontal.
+ - Usa `TransportViewModel` para gerenciar localização do usuário, raio de busca e resultados.
+ - Apresenta detalhes e filtros via sheets, com overlays de carregamento quando necessário.
+ */
+
 import SwiftUI
 import CoreLocation
 import MapKit
 
+/// Tela principal do módulo de transporte com mapa, barra de busca, filtros e lista de opções.
 struct TransportView: View {
+    /// ViewModel responsável por estado de localização, busca e resultados de transporte.
     @StateObject private var viewModel = TransportViewModel()
+    /// Controla a apresentação da folha de filtros de transporte.
     @State private var showingFilters = false
+    /// Opção de transporte selecionada para exibir detalhes em sheet.
     @State private var selectedTransport: TransportOptionModel?
     
+    /// Estrutura de navegação com mapa, controles flutuantes e lista de resultados.
     var body: some View {
         NavigationStack {
             ZStack(alignment: .bottom) {
@@ -84,11 +97,14 @@ struct TransportView: View {
     }
 }
 
-// MARK: - Componentes da View
+/// Barra de busca para endereços/pontos, disparando pesquisa no ViewModel ao submeter texto.
 struct SearchBarView: View {
+    /// ViewModel usado para realizar a busca quando o usuário submete o texto.
     @ObservedObject var viewModel: TransportViewModel
+    /// Texto digitado na barra de busca.
     @State private var searchText = ""
     
+    /// Campo de texto com ícone de busca e botão para limpar conteúdo.
     var body: some View {
         HStack {
             Image(systemName: "magnifyingglass")
@@ -114,10 +130,14 @@ struct SearchBarView: View {
     }
 }
 
+/// Controles flutuantes para filtros e ajuste do raio de busca.
 struct FloatingControlsView: View {
+    /// ViewModel que reflete e atualiza o raio de busca.
     @ObservedObject var viewModel: TransportViewModel
+    /// Binding que controla a apresentação da folha de filtros.
     @Binding var showingFilters: Bool
     
+    /// Botão de filtros e slider para ajustar o raio de busca com feedback textual.
     var body: some View {
         HStack(spacing: 16) {
             // Botão de filtros
@@ -162,10 +182,14 @@ struct FloatingControlsView: View {
     }
 }
 
+/// Lista horizontal de cartões de opções de transporte.
 struct TransportListview: View {
+    /// Coleção de opções de transporte a serem exibidas.
     let options: [TransportOptionModel]
+    /// Binding para a opção selecionada, usada para abrir o detalhe.
     @Binding var selectedTransport: TransportOptionModel?
     
+    /// Scroll horizontal com cartões; toca para selecionar e abrir detalhes.
     var body: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 12) {
@@ -186,9 +210,12 @@ struct TransportListview: View {
     }
 }
 
+/// Cartão visual de uma opção de transporte, mostrando ícone, nome, duração, distância e preço.
 struct TransportCardView: View {
+    /// Dados da opção de transporte exibida no cartão.
     let option: TransportOptionModel
     
+    /// Layout do cartão com ícone destacado e informações resumidas.
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             // Ícone do tipo de transporte
@@ -236,7 +263,9 @@ struct TransportCardView: View {
     }
 }
 
+/// Overlay semitransparente com indicador de progresso enquanto busca opções.
 struct LoadingOverlayView: View {
+    /// Fundo escurecido com `ProgressView` e mensagem informativa.
     var body: some View {
         ZStack {
             Color.black.opacity(0.3)
@@ -257,12 +286,12 @@ struct LoadingOverlayView: View {
     }
 }
 
-// MARK: - Preview
+/// Preview da tela principal do módulo de transporte.
 #Preview {
     TransportView()
 }
 
-// MARK: - Helper Functions para Previews (com @MainActor)
+/// Helper para criar uma opção de transporte de exemplo (usado em Previews).
 @MainActor
 private func createSampleTransport() -> TransportOptionModel {
     TransportOptionModel(
@@ -283,6 +312,7 @@ private func createSampleTransport() -> TransportOptionModel {
     )
 }
 
+/// Helper para criar um ViewModel com dados mockados para Previews.
 @MainActor
 private func createMockMapViewModel() -> TransportViewModel {
     let viewModel = TransportViewModel()
@@ -297,6 +327,7 @@ private func createMockMapViewModel() -> TransportViewModel {
     return viewModel
 }
 
+/// Conjunto de Previews com diferentes telas do módulo de transporte.
 #Preview("Transport Module Preview") {
     VStack(spacing: 0) {
         // Header
@@ -333,13 +364,14 @@ private func createMockMapViewModel() -> TransportViewModel {
     .padding()
 }
 
-// MARK: - Preview para diferentes tamanhos de tela
+/// Preview de tamanho de dispositivo específico.
 #Preview("iPhone 15 Pro") {
     TransportDetailView(transport: MockData.transportSample)
         .previewDevice("iPhone 15 Pro")
         .previewDisplayName("iPhone 15 Pro")
 }
 
+/// Preview em modo escuro.
 #Preview("Dark Mode") {
     TransportDetailView(transport: MockData.transportSample)
         .preferredColorScheme(.dark)

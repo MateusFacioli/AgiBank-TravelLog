@@ -8,17 +8,29 @@
 import Foundation
 import SwiftUI
 
+/**
+ Estrutura que representa um item de menu navegável no app.
+ Contém título, ícone, categoria e estado de seleção associados a uma categoria de viagem.
+ Usada para compor o menu principal de navegação de destinos, transportes e experiências.
+ */
 struct MenuItem: Identifiable, Equatable {
+    /// Identificador único do item de menu.
     let id = UUID()
+    /// Título visível para o usuário no menu.
     let title: String
+    /// Nome do ícone associado ao item de menu.
     let icon: String
+    /// Categoria do menu a que este item pertence.
     let category: MenuCategory
+    /// Estado que indica se o item está atualmente selecionado no menu.
     var isSelected: Bool = false
     
+    /// Verifica a igualdade entre dois itens de menu baseada no seu identificador único.
     static func == (lhs: MenuItem, rhs: MenuItem) -> Bool {
         lhs.id == rhs.id
     }
     
+    /// Cria um MenuItem a partir de uma categoria, podendo definir se está selecionado.
     static func from(category: MenuCategory, isSelected: Bool = false) -> MenuItem {
         return MenuItem(
             title: category.title,
@@ -30,19 +42,35 @@ struct MenuItem: Identifiable, Equatable {
 }
 
 // MARK: - MenuCategory Enum
+
+/**
+ Enum que representa as diferentes categorias disponíveis no menu principal do app.
+ Cada categoria corresponde a um tipo de destino, transporte ou atividade que o usuário pode acessar.
+ */
 extension MenuItem {
     enum MenuCategory: String, CaseIterable {
+        /// Representa a categoria de viagens do usuário.
         case myTrips = "Minhas Viagens"
+        /// Representa a categoria de voos do usuário.
         case flights = "Voos"
+        /// Representa a categoria de hospedagens em hotéis.
         case hotels = "Hotéis"
+        /// Representa a categoria de transportes terrestres (ex.: Uber).
         case ubers = "Transporte"
+        /// Representa a categoria de cruzeiros marítimos.
         case cruises = "Cruzeiros"
+        /// Representa a categoria de camping e acampamentos.
         case camping = "Camping"
+        /// Representa a categoria de aventuras e esportes radicais.
         case adventures = "Aventuras"
+        /// Representa a categoria de restaurantes para refeições.
         case restaurants = "Restaurantes"
+        /// Representa a categoria de compras e lojas.
         case shopping = "Compras"
+        /// Representa a categoria de atividades e passeios.
         case activities = "Atividades"
         
+        /// Ícone associado visualmente a cada categoria.
         var icon: String {
             switch self {
             case .myTrips: return "suitcase.fill"
@@ -58,10 +86,12 @@ extension MenuItem {
             }
         }
         
+        /// Título descritivo da categoria para exibição no menu.
         var title: String {
             return self.rawValue
         }
         
+        /// Título para estados vazios (sem itens) personalizados por categoria.
         var emptyStateTitle: String {
             switch self {
             case .myTrips: return "Nenhuma Viagem Encontrada"
@@ -69,6 +99,7 @@ extension MenuItem {
             }
         }
         
+        /// Mensagem explicativa para estados vazios, orientando o usuário.
         var emptyStateMessage: String {
             switch self {
             case .myTrips: return "Comece adicionando sua primeira viagem para ver seus destinos aqui."
@@ -84,6 +115,7 @@ extension MenuItem {
             }
         }
         
+        /// Palavras-chave associadas para facilitar buscas e filtros.
         var keywords: [String] {
             switch self {
             case .myTrips: return ["viagens", "destinos", "lugares", "roteiros"]
@@ -99,7 +131,7 @@ extension MenuItem {
             }
         }
         
-        // Para analytics/tracking
+        /// Nome utilizado para analytics e tracking, formatado para consistência.
         var analyticsName: String {
             return "menu_category_\(self.rawValue.lowercased().replacingOccurrences(of: " ", with: "_"))"
         }
@@ -108,19 +140,21 @@ extension MenuItem {
 
 // MARK: - Convenience Methods
 extension MenuItem {
-    // Retorna todos os itens do menu em ordem
+    /// Retorna todos os itens do menu em ordem padrão, com isSelected = false.
     static var allItems: [MenuItem] {
         return MenuCategory.allCases.map { MenuItem.from(category: $0) }
     }
     
-    // Retorna itens pré-selecionados (para uso inicial)
+    /// Retorna os itens padrão do menu, com a categoria `.myTrips` selecionada.
     static var defaultItems: [MenuItem] {
         return MenuCategory.allCases.map {
             MenuItem.from(category: $0, isSelected: $0 == .myTrips)
         }
     }
     
-    // Factory method para criar um menu com um item específico selecionado
+    /// Factory method para criar um menu com um item específico selecionado.
+    /// - Parameter selectedCategory: Categoria que será marcada como selecionada.
+    /// - Returns: Array de MenuItem com somente a categoria selecionada marcada.
     static func menuWithSelected(_ selectedCategory: MenuCategory) -> [MenuItem] {
         return MenuCategory.allCases.map {
             MenuItem.from(
@@ -133,22 +167,22 @@ extension MenuItem {
 
 // MARK: - Helper Functions
 extension MenuItem {
-    // Verifica se a categoria representa uma viagem principal
+    /// Verifica se a categoria representa uma viagem principal.
     var isMainTripCategory: Bool {
         return category == .myTrips
     }
     
-    // Verifica se a categoria representa uma reserva/acomodação
+    /// Verifica se a categoria representa uma reserva/acomodação.
     var isAccommodationCategory: Bool {
         return [.hotels, .camping].contains(category)
     }
     
-    // Verifica se a categoria representa transporte
+    /// Verifica se a categoria representa transporte.
     var isTransportCategory: Bool {
         return [.flights, .ubers, .cruises].contains(category)
     }
     
-    // Verifica se a categoria representa atividades/lazer
+    /// Verifica se a categoria representa atividades/lazer.
     var isActivityCategory: Bool {
         return [.adventures, .restaurants, .shopping, .activities].contains(category)
     }
@@ -156,6 +190,11 @@ extension MenuItem {
 
 
 // MARK: - Codable Support (se necessário para persistência)
+
+/**
+ Suporte à codificação e decodificação do MenuItem para permitir persistência em armazenamento local, transferência de dados ou sincronização.
+ Implementa protocolo Codable para serializar propriedades essenciais do item de menu.
+ */
 extension MenuItem: Codable {
     enum CodingKeys: String, CodingKey {
         case title, icon, category, isSelected
@@ -178,3 +217,4 @@ extension MenuItem: Codable {
         try container.encode(isSelected, forKey: .isSelected)
     }
 }
+

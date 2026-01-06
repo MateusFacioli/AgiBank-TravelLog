@@ -5,11 +5,14 @@
 //  Created by Mateus Rodrigues on 16/12/25.
 //
 
-
 import Foundation
 import SwiftUI
 import CoreLocation
 
+/// Serviço que agrega múltiplas fontes externas para enriquecer dados de destinos.
+///
+/// Faz caching, chamadas paralelas e fallback para dados mock quando chaves de API
+/// não estão configuradas.
 protocol TransportAPIServiceProtocol {
     func enrichDestination(_ destination: TravelDestination) async throws -> EnrichedDestinationModel
     func getCachedData(for key: String) -> EnrichedDestinationModel?
@@ -26,6 +29,10 @@ class TransportAPIService: TransportAPIServiceProtocol {
     private init() {}
     
     // MARK: - Public API
+    
+    /// Enriquecimento principal: agrupa clima, fotos, avaliações, tempo de viagem etc.
+    /// - Parameter destination: destino a ser enriquecido.
+    /// - Returns: `EnrichedDestinationModel` com os dados agregados.
     func enrichDestination(_ destination: TravelDestination) async throws -> EnrichedDestinationModel {
         // Verifica cache primeiro
         let cacheKey = destination.id.uuidString
@@ -89,10 +96,12 @@ class TransportAPIService: TransportAPIServiceProtocol {
         return enrichedData
     }
     
+    /// Retorna dados em cache (se existirem).
     func getCachedData(for key: String) -> EnrichedDestinationModel? {
         return cache.object(forKey: key as NSString)?.data
     }
     
+    /// Armazena dados no cache.
     func cacheData(_ data: EnrichedDestinationModel, for key: String) {
         cache.setObject(
             CachedDestinationData(data: data),
@@ -100,9 +109,8 @@ class TransportAPIService: TransportAPIServiceProtocol {
         )
     }
     
-    // MARK: - APIs Reais
+    // MARK: - APIs Reais (implementações auxiliares)
     
-    // 1. OpenWeather API
     private func fetchWeather(for location: String) async -> WeatherDataModel? {
         guard let apiKey = Bundle.main.infoDictionary?["OpenWeatherAPIKey"] as? String else {
             print("⚠️ OpenWeather API Key não configurada - usando dados mockados")
@@ -144,7 +152,6 @@ class TransportAPIService: TransportAPIServiceProtocol {
         }
     }
     
-    // 2. Unsplash API para fotos
     private func fetchDestinationPhotos(for destination: String) async -> [String]? {
         guard let apiKey = Bundle.main.infoDictionary?["UnsplashAPIKey"] as? String else {
             print("⚠️ Unsplash API Key não configurada")
@@ -174,7 +181,6 @@ class TransportAPIService: TransportAPIServiceProtocol {
         }
     }
     
-    // 3. Google Places API para avaliações
     private func fetchLocalReviews(for place: String, location: String) async -> [LocalReviewModel]? {
         guard let apiKey = Bundle.main.infoDictionary?["GoogleAPIKey"] as? String else {
             print("⚠️ Google API Key não configurada")
@@ -211,7 +217,6 @@ class TransportAPIService: TransportAPIServiceProtocol {
         }
     }
     
-    // 4. Google Directions API para tempo de viagem
     private func calculateTravelTime(to destination: String) async -> TravelTimeDataModel? {
         guard let destinationCoord = await geocodeAddress(destination) else {
             return mockTravelTimeData()

@@ -32,3 +32,6 @@ Notes
 - Password min length for Email/Password in Firebase is typically 6 chars.
 - If you want email verification flows, after createUser call `user.sendEmailVerification()` and enforce checking `user.isEmailVerified`.
 - For production, add error mapping and user-friendly messages, plus secure password rules and UX flows.
+
+# Access documentation
+ - control command shift d

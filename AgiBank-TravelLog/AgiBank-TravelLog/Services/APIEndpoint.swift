@@ -7,6 +7,7 @@
 
 import Foundation
 
+/// Struct vazio usado para representar respostas HTTP sem corpo decodificável.
 struct EmptyResponse: Decodable {
     init() {}
     init(from decoder: Decoder) throws {
@@ -14,12 +15,15 @@ struct EmptyResponse: Decodable {
     }
 }
 
-
+/// Enum com os endpoints da API do TravelLog.
+///
+/// Use `url` e `method` para construir requisições HTTP.
 enum APIEndpoint {
     case destinations
     case saveDestination(TravelDestination)
     case uploadImage(Data)
     
+    /// URL completa do endpoint.
     var url: URL {
         //MARK: GET FLAGS AND CURRENCIES
         let baseURL = URL(string: "https://api.travellog.com/v1")!
@@ -33,6 +37,7 @@ enum APIEndpoint {
         }
     }
     
+    /// Método HTTP a ser usado para o endpoint.
     var method: String {
         switch self {
         case .destinations: return "GET"
@@ -42,13 +47,22 @@ enum APIEndpoint {
     }
 }
 
+/// Cliente HTTP assíncrono que realiza requisições e decodifica respostas.
+///
+/// - Observação: lança `APIError` em cenários de falha.
 actor APIClient {
     private let session: URLSession
     
+    /// Inicializa o cliente com uma configuração de sessão opcional.
     init(configuration: URLSessionConfiguration = .default) {
         self.session = URLSession(configuration: configuration)
     }
     
+    /// Faz uma requisição para o endpoint e decodifica o resultado em `T`.
+    ///
+    /// - Parameter endpoint: endpoint a ser solicitado.
+    /// - Returns: objeto decodificado do tipo `T`.
+    /// - Throws: `APIError` em caso de falhas de rede, status HTTP inválido ou erro de decodificação.
     func request<T: Decodable>(_ endpoint: APIEndpoint) async throws -> T {
         var request = URLRequest(url: endpoint.url)
         request.httpMethod = endpoint.method
@@ -89,10 +103,15 @@ actor APIClient {
         return try JSONDecoder().decode(T.self, from: data)
     }
 
+   /// Requisição sem retorno (usa `EmptyResponse`).
+   /// - Parameter endpoint: endpoint a ser solicitado.
    func request(_ endpoint: APIEndpoint) async throws {
        let _: EmptyResponse = try await request(endpoint)
    }
     
+    /// Upload fictício — placeholder que retorna uma URL de exemplo.
+    /// - Parameter data: dados a enviar.
+    /// - Returns: URL do arquivo enviado.
     func upload(data: Data) async throws -> URL {
         //MARK: TODO Implementation for file upload
         return URL(string: "https://cdn.travellog.com/photo.jpg")!
