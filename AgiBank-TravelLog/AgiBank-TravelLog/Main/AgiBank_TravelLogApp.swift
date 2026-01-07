@@ -11,7 +11,7 @@ import SwiftUI
 struct AgiBank_TravelLogApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            MainView()// ContentView()
         }
     }
 }
